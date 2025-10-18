@@ -9,7 +9,7 @@ import type { User, Post } from '@/types';
 
 export async function getStaticPaths() {
   const users = await getAllUsers();
-  return users.map((user) => ({
+  return users.map((user: User) => ({
     params: { slug: user.slug },
   }));
 }

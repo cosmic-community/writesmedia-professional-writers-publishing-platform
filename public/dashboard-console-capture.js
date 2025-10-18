@@ -20,7 +20,7 @@
     const message = args.map(arg => {
       if (typeof arg === 'object' && arg !== null) {
         try {
-          return JSON.stringify(arg, (key, value) => {
+          return JSON.stringify(arg, (_key, value) => {
             if (typeof value === 'function') return '[Function]';
             if (value instanceof Error) return value.toString();
             return value;

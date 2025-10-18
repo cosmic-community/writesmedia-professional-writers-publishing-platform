@@ -9,7 +9,7 @@ import type { Tag, Post } from '@/types';
 
 export async function getStaticPaths() {
   const tags = await getAllTags();
-  return tags.map((tag) => ({
+  return tags.map((tag: Tag) => ({
     params: { slug: tag.slug },
   }));
 }

@@ -1,4 +1,5 @@
 import { createBucketClient } from '@cosmicjs/sdk';
+import type { Post, Tag } from './types';
 
 export const cosmic = createBucketClient({
   bucketSlug: import.meta.env.COSMIC_BUCKET_SLUG,
@@ -105,10 +106,10 @@ export async function getAllTags() {
 export async function getPostsByTag(tagSlug: string) {
   try {
     const allPosts = await getAllPosts();
-    return allPosts.filter(post => {
+    return allPosts.filter((post: Post) => {
       const tags = post.metadata?.tags;
       if (!tags || !Array.isArray(tags)) return false;
-      return tags.some(tag => tag.slug === tagSlug);
+      return tags.some((tag: Tag) => tag.slug === tagSlug);
     });
   } catch (error) {
     if (hasStatus(error) && error.status === 404) {
