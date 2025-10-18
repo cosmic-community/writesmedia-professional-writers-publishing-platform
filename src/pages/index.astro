@@ -1,0 +1,109 @@
+---
+// src/pages/index.astro
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import PostCard from '@/components/PostCard.astro';
+import { getAllPosts } from '@/lib/cosmic';
+import type { Post } from '@/types';
+
+const posts = await getAllPosts() as Post[];
+
+// Sort by read count for featured content
+const sortedPosts = posts.sort((a, b) => {
+  const readA = a.metadata?.read_count || 0;
+  const readB = b.metadata?.read_count || 0;
+  return readB - readA;
+});
+---
+
+<Layout title="WritesMedia - Professional Writers Publishing Platform">
+  <Header />
+  
+  <main class="min-h-screen">
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-b from-gray-50 to-white py-20">
+      <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto text-center">
+          <h1 class="text-5xl font-bold mb-6 text-balance">
+            Publish, Protect, Promote Your Creative Works
+          </h1>
+          <p class="text-xl text-gray-600 mb-8">
+            A platform for professional writers to share stories, scripts, and creative content with copyright protection and engagement tracking.
+          </p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Featured Content -->
+    <section class="py-16">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold">Featured Content</h2>
+          <a href="/posts" class="text-primary hover:underline font-medium">
+            View all →
+          </a>
+        </div>
+        
+        {sortedPosts.length === 0 ? (
+          <div class="text-center py-12">
+            <p class="text-gray-600">No posts available yet.</p>
+          </div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {sortedPosts.slice(0, 6).map((post) => (
+              <PostCard post={post} />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+    
+    <!-- Content Types -->
+    <section class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold mb-12 text-center">Content Types We Support</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-4xl mb-4">📝</div>
+            <h3 class="text-xl font-bold mb-2">Stories</h3>
+            <p class="text-gray-600">Share your fictional narratives and creative prose with readers worldwide.</p>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-4xl mb-4">🎬</div>
+            <h3 class="text-xl font-bold mb-2">Screenplays</h3>
+            <p class="text-gray-600">Publish movie scripts, drama scripts, and cartoon scripts with proper formatting.</p>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-4xl mb-4">📰</div>
+            <h3 class="text-xl font-bold mb-2">Blog Posts</h3>
+            <p class="text-gray-600">Share writing tips, insights, and articles about your creative process.</p>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-4xl mb-4">🎭</div>
+            <h3 class="text-xl font-bold mb-2">Child Plays</h3>
+            <p class="text-gray-600">Publish scripts designed for children's theater and educational performances.</p>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-4xl mb-4">©️</div>
+            <h3 class="text-xl font-bold mb-2">Copyright Protection</h3>
+            <p class="text-gray-600">All content includes copyright notices and optional watermarking for security.</p>
+          </div>
+          
+          <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-4xl mb-4">📊</div>
+            <h3 class="text-xl font-bold mb-2">Analytics</h3>
+            <p class="text-gray-600">Track reads, likes, and comments to measure your content's impact.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</Layout>

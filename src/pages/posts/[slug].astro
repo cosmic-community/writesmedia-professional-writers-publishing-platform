@@ -1,0 +1,168 @@
+---
+// src/pages/posts/[slug].astro
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { getAllPosts, getPostBySlug } from '@/lib/cosmic';
+import type { Post } from '@/types';
+import { getAuthor } from '@/types';
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const post = await getPostBySlug(slug) as Post | null;
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const author = getAuthor(post);
+const coverImage = post.metadata?.cover_image;
+const contentType = post.metadata?.content_type;
+const synopsis = post.metadata?.synopsis;
+const content = post.metadata?.content;
+const copyrightText = post.metadata?.copyright_text;
+const watermarkSettings = post.metadata?.watermark_settings;
+const tags = post.metadata?.tags || [];
+const readCount = post.metadata?.read_count || 0;
+const likeCount = post.metadata?.like_count || 0;
+const commentCount = post.metadata?.comment_count || 0;
+---
+
+<Layout title={post.title}>
+  <Header />
+  
+  <main class="min-h-screen">
+    <article class="py-12">
+      <div class="container mx-auto px-4 max-w-4xl">
+        <!-- Post Header -->
+        <div class="mb-8">
+          {contentType && (
+            <span class="inline-block px-3 py-1 text-sm font-semibold text-primary bg-secondary rounded-full mb-4">
+              {contentType.value}
+            </span>
+          )}
+          
+          <h1 class="text-4xl md:text-5xl font-bold mb-4 text-balance">
+            {post.title}
+          </h1>
+          
+          {synopsis && (
+            <p class="text-xl text-gray-600 mb-6">
+              {synopsis}
+            </p>
+          )}
+          
+          <!-- Author and Meta -->
+          <div class="flex flex-wrap items-center gap-6 py-6 border-y border-gray-200">
+            {author && (
+              <a href={`/writers/${author.slug}`} class="flex items-center space-x-3 hover:opacity-80">
+                {author.metadata?.avatar && (
+                  <img
+                    src={`${author.metadata.avatar.imgix_url}?w=96&h=96&fit=crop&auto=format,compress`}
+                    alt={author.title}
+                    class="w-12 h-12 rounded-full"
+                    width="48"
+                    height="48"
+                  />
+                )}
+                <div>
+                  <div class="font-semibold text-gray-900">
+                    {author.metadata?.name || author.title}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    {author.metadata?.username && `@${author.metadata.username}`}
+                  </div>
+                </div>
+              </a>
+            )}
+            
+            <div class="flex items-center space-x-6 text-sm text-gray-600">
+              <span class="flex items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                {readCount} reads
+              </span>
+              <span class="flex items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {likeCount}
+              </span>
+              <span class="flex items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                {commentCount}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Cover Image -->
+        {coverImage && (
+          <div class="mb-8">
+            <img
+              src={`${coverImage.imgix_url}?w=1600&h=800&fit=crop&auto=format,compress`}
+              alt={post.title}
+              class="w-full rounded-lg"
+              width="800"
+              height="400"
+            />
+          </div>
+        )}
+        
+        <!-- Content -->
+        {content && (
+          <div class="prose prose-lg max-w-none mb-12">
+            <div set:html={content.replace(/\n/g, '<br>')} />
+          </div>
+        )}
+        
+        <!-- Copyright Notice -->
+        {copyrightText && (
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
+            <h3 class="font-bold mb-2 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+              </svg>
+              Copyright Notice
+            </h3>
+            <p class="text-sm text-gray-600">{copyrightText}</p>
+            {watermarkSettings && watermarkSettings.mode && (
+              <p class="text-xs text-gray-500 mt-2">
+                Watermark: {watermarkSettings.mode} mode
+              </p>
+            )}
+          </div>
+        )}
+        
+        <!-- Tags -->
+        {tags.length > 0 && (
+          <div class="mb-8">
+            <h3 class="font-bold mb-3">Tags</h3>
+            <div class="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <a
+                  href={`/tags/${tag.slug}`}
+                  class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm font-medium transition-colors"
+                >
+                  {tag.metadata?.name || tag.title}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </article>
+  </main>
+  
+  <Footer />
+</Layout>

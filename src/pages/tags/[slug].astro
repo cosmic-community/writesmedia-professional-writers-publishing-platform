@@ -1,0 +1,62 @@
+---
+// src/pages/tags/[slug].astro
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import PostCard from '@/components/PostCard.astro';
+import { getAllTags, getPostsByTag } from '@/lib/cosmic';
+import type { Tag, Post } from '@/types';
+
+export async function getStaticPaths() {
+  const tags = await getAllTags();
+  return tags.map((tag) => ({
+    params: { slug: tag.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const tags = await getAllTags() as Tag[];
+const tag = tags.find(t => t.slug === slug);
+
+if (!tag) {
+  return Astro.redirect('/404');
+}
+
+const posts = await getPostsByTag(slug) as Post[];
+---
+
+<Layout title={`${tag.metadata?.name || tag.title} - WritesMedia`}>
+  <Header />
+  
+  <main class="min-h-screen py-12">
+    <div class="container mx-auto px-4">
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-4">
+          {tag.metadata?.name || tag.title}
+        </h1>
+        {tag.metadata?.description && (
+          <p class="text-xl text-gray-600">
+            {tag.metadata.description}
+          </p>
+        )}
+        <p class="text-gray-500 mt-2">
+          {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+        </p>
+      </div>
+      
+      {posts.length === 0 ? (
+        <div class="text-center py-12 bg-gray-50 rounded-lg">
+          <p class="text-gray-600">No posts with this tag yet.</p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {posts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      )}
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>
